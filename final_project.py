@@ -162,7 +162,7 @@ def file_dialog(action):
 
 
 
-tk.Label(root, text="Cipher Tool", font=FONT_TITLE, bg=BG_SURFACE, fg=ACCENT_PRI).pack(fill=tk.X, ipady=5)
+tk.Label(root, text="CIPHER TOOL", font=FONT_TITLE, bg=BG_SURFACE, fg=ACCENT_PRI).pack(fill=tk.X, ipady=5)
 
 main_frame = tk.Frame(root, bg=BG_DARK, padx=10, pady=10)
 main_frame.pack(fill=tk.BOTH, expand=True)
@@ -218,3 +218,5 @@ status_label = tk.Label(status_frame, text="[READY]", font=("Arial", 9), bg=BG_S
 status_label.pack(fill=tk.X, padx=5)
 
 root.mainloop()
+
+
