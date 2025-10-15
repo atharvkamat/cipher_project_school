@@ -65,13 +65,13 @@ FG_TEXT = "#cdd6f4"
 ACCENT_PRI = "#f9e2af"   
 ACCENT_NEG = "#f38ba8"   
 
-FONT_BODY = ('Arial', 12,'bold')
-FONT_TITLE = ('Arial', 14, 'bold')
-FONT_LABEL = ('Arial', 12, 'bold')
+FONT_BODY = ('Arial', 14,'bold')
+FONT_TITLE = ('Arial', 15, 'bold')
+FONT_LABEL = ('Arial', 15, 'bold')
 
 root = tk.Tk()
 root.title("FINAL PROJECT")
-root.geometry("550x550")
+root.geometry("1280x720")
 root.configure(bg=BG_DARK)
 show_password = False
 
