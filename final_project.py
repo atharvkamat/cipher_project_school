@@ -78,16 +78,21 @@ show_password = False
 
 def handle_encrypt():
     plain = input_text.get("1.0", tk.END).strip()
-    if not plain: messagebox.showwarning("Warning", "Enter text!"); return
+    if not plain: 
+        messagebox.showwarning("Warning", "Enter text!")
+        return None
     try:
         encrypted, password = encrypter(plain, password_entry.get().strip() or False)
-        output_text.delete("1.0", tk.END); output_text.insert("1.0", encrypted)
-        password_entry.delete(0, tk.END); password_entry.insert(0, password)
+        output_text.delete("1.0", tk.END)
+        output_text.insert("1.0", encrypted)
+        password_entry.delete(0, tk.END) 
+        password_entry.insert(0, password)
         status_label.config(text="ENCRYPTED", fg=ACCENT_PRI)
     except FileNotFoundError: 
         status_label.config(text="FAILED (Missing D:\\ files)", fg=ACCENT_NEG)
     except Exception as e: 
-        messagebox.showerror("Error", str(e)); status_label.config(text="FAILED", fg=ACCENT_NEG)
+        messagebox.showerror("Error", str(e))
+        status_label.config(text="FAILED", fg=ACCENT_NEG)
 
 def handle_decrypt():
     cipher = input_text.get("1.0", tk.END).strip()
@@ -97,12 +102,14 @@ def handle_decrypt():
         return None
     try:
         decrypted = decrypter(cipher, password)
-        output_text.delete("1.0", tk.END); output_text.insert("1.0", decrypted)
+        output_text.delete("1.0", tk.END)
+        output_text.insert("1.0", decrypted)
         status_label.config(text="DECRYPTED", fg=ACCENT_PRI)
     except FileNotFoundError: 
         status_label.config(text="FAILED (Missing D:\\ files)", fg=ACCENT_NEG)
     except Exception as e: 
-        messagebox.showerror("Error", str(e)); status_label.config(text="FAILED", fg=ACCENT_NEG)
+        messagebox.showerror("Error", str(e))
+        status_label.config(text="FAILED", fg=ACCENT_NEG)
 
 def generate_password():
     password_entry.delete(0, tk.END)
@@ -124,7 +131,9 @@ def toggle_password():
     show_btn.config(text=text, fg=color)
 
 def clear_all():
-    input_text.delete("1.0", tk.END); output_text.delete("1.0", tk.END); password_entry.delete(0, tk.END)
+    input_text.delete("1.0", tk.END)
+    output_text.delete("1.0", tk.END)
+    password_entry.delete(0, tk.END)
     status_label.config(text="[READY]", fg=FG_TEXT)
 
 def copy_output():
@@ -143,7 +152,8 @@ def file_dialog(action):
         if file_path:
             try:
                 with open(file_path, 'r') as f: content = f.read()
-                input_text.delete("1.0", tk.END); input_text.insert("1.0", content)
+                input_text.delete("1.0", tk.END)
+                input_text.insert("1.0", content)
                 status_label.config(text="FILE LOADED", fg=ACCENT_PRI)
             except Exception as e: 
                 messagebox.showerror("Error", f"Load failed: {str(e)}")
@@ -218,5 +228,3 @@ status_label = tk.Label(status_frame, text="[READY]", font=("Arial", 9), bg=BG_S
 status_label.pack(fill=tk.X, padx=5)
 
 root.mainloop()
-
-
