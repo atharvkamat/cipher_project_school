@@ -3,25 +3,25 @@ import string
 import tkinter as tk
 from tkinter import messagebox, filedialog, scrolledtext
 
-global symbol_list, symbol_list_len
-symbol_list = list(string.printable)
-symbol_list_len = len(symbol_list)
+global symbols, symbols_len
+symbols = list(string.printable)
+symbols_len = len(symbols)
 
 def password_maker():
-    pass_list = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e']
+    pass_list = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
     password = ''
     for i in range(16):
         password += choice(pass_list)
     return password
 
 def key_file(n, i):
-    file_path = f'D:\\school_project_2025\\vignere_shift_final\\cs_project_keys_files\\cs_project_keys\\{n}.txt'
+    file_path = f'D:\\python projects\\lab activity 3\\test test\\test_{n}.txt'
     with open(file_path, 'r') as file:
         file.seek(i, 0)
         return file.read(1)
 
 def key_maker(plain_text_length, password):
-    t = plain_text_length // 16 + 1
+    t = (plain_text_length//16) + 1
     key = ''
     for i in range(t):
         for k in password:
@@ -37,8 +37,8 @@ def encrypter(plain_text, password=False):
     value = ''
     for a in range(p_len):
         try:
-            sum_val = symbol_list.index(plain_text[a]) + symbol_list.index(key[a])
-            value += symbol_list[sum_val % symbol_list_len]
+            sum_val = symbols.index(plain_text[a]) + symbols.index(key[a])
+            value += symbols[sum_val % symbols_len]
         except ValueError:
             value += plain_text[a]
     del key
@@ -50,8 +50,8 @@ def decrypter(value, password):
     plain_text = ''
     for a in range(p_len):
         try:
-            diff = symbol_list.index(value[a]) - symbol_list.index(key[a])
-            plain_text += symbol_list[diff % symbol_list_len]
+            diff = symbols.index(value[a]) - symbols.index(key[a])
+            plain_text += symbols[diff % symbols_len]
         except ValueError:
             plain_text += value[a]
     del key
@@ -62,7 +62,7 @@ def decrypter(value, password):
 BG_DARK = "#f0f0f0"      
 BG_SURFACE = "#ffffff"   
 FG_TEXT = "#333333"      
-ACCENT_PRI = "#ffae00"   
+ACCENT_PRI = "#00087a"   
 ACCENT_NEG = "#ff0000" 
 
 FONT_BODY = ('Consolas', 14,'bold')
@@ -134,7 +134,7 @@ def clear_all():
     input_text.delete("1.0", tk.END)
     output_text.delete("1.0", tk.END)
     password_entry.delete(0, tk.END)
-    status_label.config(text="[READY]", fg=FG_TEXT)
+    status_label.config(text="READY", fg=FG_TEXT)
 
 def copy_output():
     output = output_text.get("1.0", tk.END).strip()
@@ -224,7 +224,8 @@ status_frame = tk.Frame(root, bg=BG_SURFACE, height=25, relief=tk.SUNKEN, bd=1)
 status_frame.pack(fill=tk.X, side=tk.BOTTOM)
 status_frame.pack_propagate(False)
 
-status_label = tk.Label(status_frame, text="[READY]", font=("Arial", 9), bg=BG_SURFACE, fg=FG_TEXT, anchor=tk.W)
+status_label = tk.Label(status_frame, text="READY", font=("Consolas", 9,'bold'), bg=BG_SURFACE, fg=FG_TEXT, anchor=tk.W)
 status_label.pack(fill=tk.X, padx=5)
 
 root.mainloop()
+
