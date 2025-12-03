@@ -15,7 +15,7 @@ def password_maker():
     return password
 
 def key_file(n, i):
-    file_path = f'D:\\school_project_2025\\cs_project_keys\\{n}.txt'
+    file_path = f'D:\\cs_project\\cs_project_keys\\{n}.txt'
     with open(file_path, 'r') as file:
         file.seek(i, 0)
         return file.read(1)
