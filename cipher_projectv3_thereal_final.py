@@ -12,12 +12,8 @@ symbols_len = len(symbols)
 symbol_to_number = {}
 number_to_symbol = {}
 for i in range(symbols_len):
-    if symbols[i]== '\n':
-        symbol_to_number['\n']= '\n'
-        number_to_symbol['\n']='\n'
-    else:
-        symbol_to_number[symbols[i]]= chr(128640+i)
-        number_to_symbol[chr(128640+i)]=symbols[i]
+    symbol_to_number[symbols[i]]= chr(128640+i)
+    number_to_symbol[chr(128640+i)]=symbols[i]
 
 
 def password_maker():
@@ -84,8 +80,12 @@ def encrypter(plain_text, password=False):
         cipher_text1 = char_encrypter(block1,password,1)
         cipher_text2 = char_encrypter(block2,block1_hash)
         cipher_text = ''
+        count = 1
         for i in cipher_text1+cipher_text2:
             cipher_text += symbol_to_number[i]
+            if count%50 ==0:
+                cipher_text +='\n'
+            count +=1
     except ValueError:
         cipher_text = reserved_sentances[0]
     if plain_text in reserved_sentances:
@@ -111,7 +111,10 @@ def decrypter(raw_cipher_text, password):
     cipher_text = ''
     try:
         for i in raw_cipher_text:
-            cipher_text += number_to_symbol[i]
+            if i =='\n' or i == ' ':
+                pass
+            else:
+                cipher_text += number_to_symbol[i]
         p_len = len(cipher_text)
         plain_text = ''
 
