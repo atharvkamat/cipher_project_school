@@ -179,7 +179,7 @@ def handle_encrypt():
         status_label.config(text="ENCRYPTED", fg=ACCENT_PRI)
     except FileNotFoundError: 
         status_label.config(text="FAILED (Missing D:\\ files)", fg=ACCENT_NEG)
-    #except Exception as e: 
+    except Exception as e: 
         messagebox.showerror("Error", str(e))
         status_label.config(text="FAILED", fg=ACCENT_NEG)
 
@@ -196,7 +196,7 @@ def handle_decrypt():
         status_label.config(text="DECRYPTED", fg=ACCENT_PRI)
     except FileNotFoundError: 
         status_label.config(text="FAILED (Missing D:\\ files)", fg=ACCENT_NEG)
-    #except Exception as e: 
+    except Exception as e: 
         messagebox.showerror("Error", str(e))
         status_label.config(text="FAILED", fg=ACCENT_NEG)
 
