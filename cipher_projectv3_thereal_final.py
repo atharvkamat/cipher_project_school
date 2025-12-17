@@ -4,9 +4,21 @@ import tkinter as tk
 import hashlib as hs
 from tkinter import messagebox, filedialog, scrolledtext
 
-global symbols, symbols_len
+global symbols, symbols_len,symbol_to_number, number_to_symbol,reserved_sentances
+reserved_sentances = ['INPUT CONTAINS INVALID CHARACTERS/S','DATA CORRUPTED','SENTANCE IS RESERVED(CANNOT BE ENCRYPTED)','DATA IS OF INVALID LENGTH','PASSWORD INCORRECT OR DATA MAY HAVE BEEN CORRUPTED']
+
 symbols = list(string.printable)
 symbols_len = len(symbols)
+symbol_to_number = {}
+number_to_symbol = {}
+for i in range(symbols_len):
+    if symbols[i]== '\n':
+        symbol_to_number['\n']= '\n'
+        number_to_symbol['\n']='\n'
+    else:
+        symbol_to_number[symbols[i]]= chr(945+i)
+        number_to_symbol[chr(945+i)]=symbols[i]
+
 
 def password_maker():
     pass_list = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
@@ -16,7 +28,7 @@ def password_maker():
     return password
 
 def key_file(n, i):
-    file_path = f'D:\\school_project_2025\\cs_project_keys_files\\{n}.txt'
+    file_path = f'D:\\python projects\\lab activity 3\\cs_project_key_files_final\\{n}.txt'
     with open(file_path, 'r') as file:
         file.seek(i, 0)
         return file.read(1)
@@ -40,11 +52,8 @@ def char_encrypter(plain_text,password,block_number = 2):
     key = key_maker(p_len,password,block_number)
     cipher_text = ''
     for a in range(p_len):
-        try:
-            sum_val = symbols.index(plain_text[a]) + symbols.index(key[a])
-            cipher_text += symbols[sum_val % symbols_len]
-        except ValueError:
-            cipher_text += plain_text[a]
+        sum_val = symbols.index(plain_text[a]) + symbols.index(key[a])
+        cipher_text += symbols[sum_val % symbols_len]
     return cipher_text
 
 def encrypter(plain_text, password=False):
@@ -59,6 +68,7 @@ def encrypter(plain_text, password=False):
     for i in range(32):
         pt_filler += choice(symbols)
 
+    
     password_filler_text = password + password_filler
     pt_filler_text = plain_text+ pt_filler
 
@@ -70,9 +80,17 @@ def encrypter(plain_text, password=False):
 
     block1_hash = hs.sha256(block1.encode('utf-8')).hexdigest()
 
-    cipher_text1 = char_encrypter(block1,password,1)
-    cipher_text2 = char_encrypter(block2,block1_hash)
-    cipher_text = cipher_text1+cipher_text2
+    try:
+        cipher_text1 = char_encrypter(block1,password,1)
+        cipher_text2 = char_encrypter(block2,block1_hash)
+        cipher_text = ''
+        for i in cipher_text1+cipher_text2:
+            cipher_text += symbol_to_number[i]
+    except ValueError:
+        cipher_text = reserved_sentances[0]
+    if plain_text in reserved_sentances:
+        cipher_text = reserved_sentances[2]
+
     return cipher_text, password
 
 def char_decrypter(cipher_text,key, lower,upper,block_number = 2):
@@ -89,36 +107,42 @@ def char_decrypter(cipher_text,key, lower,upper,block_number = 2):
     return decrypted_char
     
 
-def decrypter(cipher_text, password):
-    p_len = len(cipher_text)
-    plain_text = ''
+def decrypter(raw_cipher_text, password):
+    cipher_text = ''
+    try:
+        for i in raw_cipher_text:
+            cipher_text += number_to_symbol[i]
+        p_len = len(cipher_text)
+        plain_text = ''
 
-    if p_len-192<=0:
-        plain_text = 'DATA IS OF INVALID LENGTH'
+        if p_len-192<=0:
+            plain_text = reserved_sentances[3]
 
-    else:
-        block1 = char_decrypter(cipher_text,key_maker(160,password,1),0,160,1)
-        password_filler = block1[0:32]
-        password_hash = block1[32:96]
-        plain_text_hash = block1[96:]
-
-        password_filler_text = password + password_filler
-        print('output=',password_filler,plain_text_hash,sep = ' ')
-        ciphert_output_password_hash = hs.sha256(password_filler_text.encode('utf-8')).hexdigest()
-        if ciphert_output_password_hash == password_hash:
-            block1_hash = hs.sha256(block1.encode('utf-8')).hexdigest()
-
-            block2 = char_decrypter(cipher_text, key_maker(p_len-160,block1_hash),160,p_len)
-
-            plain_text = block2[0:-32:1]
-
-            ciphert_output_pt_hash = hs.sha256(block2.encode('utf-8')).hexdigest()
-            if ciphert_output_pt_hash == plain_text_hash:
-                pass
-            else:
-                plain_text = 'DATA CORRUPTED'
         else:
-            plain_text = 'PASSWORD INCORRECT'
+            block1 = char_decrypter(cipher_text,key_maker(160,password,1),0,160,1)
+            password_filler = block1[0:32]
+            password_hash = block1[32:96]
+            plain_text_hash = block1[96:]
+
+            password_filler_text = password + password_filler
+            ciphert_output_password_hash = hs.sha256(password_filler_text.encode('utf-8')).hexdigest()
+            if ciphert_output_password_hash == password_hash:
+                block1_hash = hs.sha256(block1.encode('utf-8')).hexdigest()
+
+                block2 = char_decrypter(cipher_text, key_maker(p_len-160,block1_hash),160,p_len)
+
+                plain_text = block2[0:-32:1]
+
+                ciphert_output_pt_hash = hs.sha256(block2.encode('utf-8')).hexdigest()
+                if ciphert_output_pt_hash == plain_text_hash:
+                    pass
+                else:
+                    plain_text = reserved_sentances[1]
+
+            else:
+                plain_text = reserved_sentances[4]
+    except KeyError:
+        plain_text = reserved_sentances[1]
 
     return plain_text
 
@@ -155,7 +179,7 @@ def handle_encrypt():
         status_label.config(text="ENCRYPTED", fg=ACCENT_PRI)
     except FileNotFoundError: 
         status_label.config(text="FAILED (Missing D:\\ files)", fg=ACCENT_NEG)
-    except Exception as e: 
+    #except Exception as e: 
         messagebox.showerror("Error", str(e))
         status_label.config(text="FAILED", fg=ACCENT_NEG)
 
@@ -172,7 +196,7 @@ def handle_decrypt():
         status_label.config(text="DECRYPTED", fg=ACCENT_PRI)
     except FileNotFoundError: 
         status_label.config(text="FAILED (Missing D:\\ files)", fg=ACCENT_NEG)
-    except Exception as e: 
+    #except Exception as e: 
         messagebox.showerror("Error", str(e))
         status_label.config(text="FAILED", fg=ACCENT_NEG)
 
