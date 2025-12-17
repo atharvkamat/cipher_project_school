@@ -16,8 +16,8 @@ for i in range(symbols_len):
         symbol_to_number['\n']= '\n'
         number_to_symbol['\n']='\n'
     else:
-        symbol_to_number[symbols[i]]= chr(945+i)
-        number_to_symbol[chr(945+i)]=symbols[i]
+        symbol_to_number[symbols[i]]= chr(128640+i)
+        number_to_symbol[chr(128640+i)]=symbols[i]
 
 
 def password_maker():
@@ -154,9 +154,9 @@ FG_TEXT = "#333333"
 ACCENT_PRI = "#00087a"   
 ACCENT_NEG = "#ff0000" 
 
-FONT_BODY = ('Consolas', 14,'bold')
-FONT_TITLE = ('Consolas', 15, 'bold')
-FONT_LABEL = ('Consolas', 15, 'bold')
+FONT_BODY = ('Consolas', 20,'bold')
+FONT_TITLE = ('Consolas', 16, 'bold')
+FONT_LABEL = ('Consolas', 16, 'bold')
 
 root = tk.Tk()
 root.title("FINAL PROJECT")
@@ -235,30 +235,7 @@ def copy_output():
         messagebox.showwarning("Warning", "Nothing to copy!")
 
 
-def file_dialog(action):
-    if action == 'load':
-        file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
-        if file_path:
-            try:
-                with open(file_path, 'r') as f: 
-                    content = f.read()
-                input_text.delete("1.0", tk.END)
-                input_text.insert("1.0", content)
-                status_label.config(text="FILE LOADED", fg=ACCENT_PRI)
-            except Exception as e: 
-                messagebox.showerror("Error", f"Load failed: {str(e)}")
-    elif action == 'save':
-        output = output_text.get("1.0", tk.END).strip()
-        if not output: 
-            return
-        file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
-        if file_path:
-            try:
-                with open(file_path, 'w') as f:
-                    f.write(output)
-                status_label.config(text="FILE SAVED", fg=ACCENT_PRI)
-            except Exception as e: 
-                messagebox.showerror("Error", f"Save failed: {str(e)}")
+
 
 
 
@@ -293,7 +270,6 @@ action_frame.pack(fill=tk.X, pady=8)
 
 tk.Button(action_frame, text="ENCRYPT", command=handle_encrypt, bg=BG_SURFACE, fg=ACCENT_PRI, font=FONT_BODY, relief=tk.RAISED).pack(side=tk.LEFT, fill=tk.X, expand=True, padx=3)
 tk.Button(action_frame, text="DECRYPT", command=handle_decrypt, bg=BG_SURFACE, fg=ACCENT_NEG, font=FONT_BODY, relief=tk.RAISED).pack(side=tk.LEFT, fill=tk.X, expand=True, padx=3)
-tk.Button(action_frame, text="LOAD FILE", command=lambda: file_dialog('load'), bg=BG_SURFACE, fg=FG_TEXT, font=FONT_BODY, relief=tk.RAISED).pack(side=tk.LEFT, fill=tk.X, expand=True, padx=3)
 tk.Button(action_frame, text="CLEAR ALL", command=clear_all, bg=BG_SURFACE, fg=FG_TEXT, font=FONT_BODY, relief=tk.RAISED).pack(side=tk.LEFT, fill=tk.X, expand=True, padx=3)
 
 
@@ -307,8 +283,6 @@ output_mgmt_frame.pack(fill=tk.X)
 
 
 tk.Button(output_mgmt_frame, text="COPY", command=copy_output, bg=BG_SURFACE, fg=FG_TEXT, font=FONT_BODY, relief=tk.RAISED).pack(side=tk.LEFT, fill=tk.X, expand=True, padx=3)
-tk.Button(output_mgmt_frame, text="SAVE", command=lambda:file_dialog('save'), bg=BG_SURFACE, fg=ACCENT_PRI, font=FONT_BODY, relief=tk.RAISED).pack(side=tk.LEFT, fill=tk.X, expand=True, padx=3, ipadx=40)
-
 
 status_frame = tk.Frame(root, bg=BG_SURFACE, height=25, relief=tk.SUNKEN, bd=1)
 status_frame.pack(fill=tk.X, side=tk.BOTTOM)
@@ -318,4 +292,3 @@ status_label = tk.Label(status_frame, text="READY", font=("Consolas", 9,'bold'),
 status_label.pack(fill=tk.X, padx=5)
 
 root.mainloop()
-
