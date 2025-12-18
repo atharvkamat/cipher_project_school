@@ -4,7 +4,8 @@ import tkinter as tk
 import hashlib as hs
 from tkinter import messagebox, filedialog, scrolledtext
 
-global symbols, symbols_len,symbol_to_sub, sub_to_symbol,reserved_sentances
+global symbols, symbols_len,symbol_to_sub, sub_to_symbol,reserved_sentances,pass_list
+pass_list = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
 reserved_sentances = ['INPUT CONTAINS INVALID CHARACTERS/S','DATA CORRUPTED','SENTANCE IS RESERVED(CANNOT BE ENCRYPTED)','PASSWORD INCORRECT OR DATA MAY HAVE BEEN CORRUPTED']
 
 symbols = list(string.printable)
@@ -17,7 +18,6 @@ symbol_to_sub = eval(dictionaries[0])
 sub_to_symbol = eval(dictionaries[1])
 
 def password_maker():
-    pass_list = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
     password = ''
     for i in range(32):
         password += choice(pass_list)
@@ -64,6 +64,7 @@ def subsitution_encrypter(plaintext):
         if (current_index+1)%30 ==0:
             cipher_text += '\n'
         current_index+=1
+
     return cipher_text
 
 def encrypter(plain_text, password=False):
@@ -95,6 +96,8 @@ def encrypter(plain_text, password=False):
         cipher_text = subsitution_encrypter(cipher_text1+cipher_text2)
     except KeyError:
         cipher_text = reserved_sentances[0]
+    except ValueError:
+        cipher_text = reserved_sentances[0]
     if plain_text in reserved_sentances:
         cipher_text = reserved_sentances[2]
 
@@ -116,13 +119,19 @@ def char_decrypter(cipher_text,key, lower,upper,block_number = 2):
 def subsitution_decrypter(raw_cipher_text):
     output_text = ''
     raw_cipher_text_clean = ''
+
     for i in raw_cipher_text:
         if i in symbols:
             pass
         else:
             raw_cipher_text_clean += i
+    raw_len = len(raw_cipher_text_clean)
+    sec_check = raw_len%3
+    if sec_check !=0:
+        raw_len += -1*sec_check
+        raw_cipher_text_clean = raw_cipher_text_clean[:raw_len]
 
-    for i in range(0,len(raw_cipher_text_clean),3):
+    for i in range(0,raw_len,3):
         temp = []
         for k in raw_cipher_text_clean[i:i+3]:
             temp.append(ord(k))
@@ -257,10 +266,6 @@ def copy_output():
         status_label.config(text="COPIED", fg=ACCENT_PRI)
     else: 
         messagebox.showwarning("Warning", "Nothing to copy!")
-
-
-
-
 
 
 tk.Label(root, text="CIPHER TOOL", font=FONT_TITLE, bg=BG_SURFACE, fg=ACCENT_PRI).pack(fill=tk.X, ipady=5)
