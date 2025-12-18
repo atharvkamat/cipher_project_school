@@ -4,17 +4,17 @@ import tkinter as tk
 import hashlib as hs
 from tkinter import messagebox, filedialog, scrolledtext
 
-global symbols, symbols_len,symbol_to_number, number_to_symbol,reserved_sentances
-reserved_sentances = ['INPUT CONTAINS INVALID CHARACTERS/S','DATA CORRUPTED','SENTANCE IS RESERVED(CANNOT BE ENCRYPTED)','DATA IS OF INVALID LENGTH','PASSWORD INCORRECT OR DATA MAY HAVE BEEN CORRUPTED']
+global symbols, symbols_len,symbol_to_sub, sub_to_symbol,reserved_sentances
+reserved_sentances = ['INPUT CONTAINS INVALID CHARACTERS/S','DATA CORRUPTED','SENTANCE IS RESERVED(CANNOT BE ENCRYPTED)','PASSWORD INCORRECT OR DATA MAY HAVE BEEN CORRUPTED']
 
 symbols = list(string.printable)
 symbols_len = len(symbols)
-symbol_to_number = {}
-number_to_symbol = {}
-for i in range(symbols_len):
-    symbol_to_number[symbols[i]]= chr(128640+i)
-    number_to_symbol[chr(128640+i)]=symbols[i]
 
+with open('D:\\python projects\\lab activity 3\\cs_project_key_files_final\\substitution_cipher_dictionaries.txt','r') as f:
+    dictionaries = f.read()
+dictionaries = dictionaries.split('\n')
+symbol_to_sub = eval(dictionaries[0])
+sub_to_symbol = eval(dictionaries[1])
 
 def password_maker():
     pass_list = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
@@ -36,7 +36,6 @@ def key_maker(plain_text_length, password,block_number = 2):
         t = (plain_text_length//64) +1
 
     key = ''
-
     for i in range(t):
         for k in password:
             key += key_file(k, i)
@@ -52,6 +51,21 @@ def char_encrypter(plain_text,password,block_number = 2):
         cipher_text += symbols[sum_val % symbols_len]
     return cipher_text
 
+def subsitution_encrypter(plaintext):
+    cipher_text = ''
+    current_index = 0
+    for i in plaintext:
+        current_char_tuple = (symbols.index(i),current_index%100)
+        temp = symbol_to_sub[current_char_tuple]
+        char = ''
+        for k in temp:
+            char += chr(k)
+        cipher_text += char
+        if (current_index+1)%30 ==0:
+            cipher_text += '\n'
+        current_index+=1
+    return cipher_text
+
 def encrypter(plain_text, password=False):
     if not password:
         password = password_maker()
@@ -63,7 +77,6 @@ def encrypter(plain_text, password=False):
     pt_filler = ''
     for i in range(32):
         pt_filler += choice(symbols)
-
     
     password_filler_text = password + password_filler
     pt_filler_text = plain_text+ pt_filler
@@ -79,14 +92,8 @@ def encrypter(plain_text, password=False):
     try:
         cipher_text1 = char_encrypter(block1,password,1)
         cipher_text2 = char_encrypter(block2,block1_hash)
-        cipher_text = ''
-        count = 1
-        for i in cipher_text1+cipher_text2:
-            cipher_text += symbol_to_number[i]
-            if count%50 ==0:
-                cipher_text +='\n'
-            count +=1
-    except ValueError:
+        cipher_text = subsitution_encrypter(cipher_text1+cipher_text2)
+    except KeyError:
         cipher_text = reserved_sentances[0]
     if plain_text in reserved_sentances:
         cipher_text = reserved_sentances[2]
@@ -106,20 +113,33 @@ def char_decrypter(cipher_text,key, lower,upper,block_number = 2):
         decrypted_char += symbols[diff % symbols_len]
     return decrypted_char
     
+def subsitution_decrypter(raw_cipher_text):
+    output_text = ''
+    raw_cipher_text_clean = ''
+    for i in raw_cipher_text:
+        if i in symbols:
+            pass
+        else:
+            raw_cipher_text_clean += i
+
+    for i in range(0,len(raw_cipher_text_clean),3):
+        temp = []
+        for k in raw_cipher_text_clean[i:i+3]:
+            temp.append(ord(k))
+        temp = tuple(temp)
+        output_text += symbols[sub_to_symbol[temp]]
+
+    return output_text
 
 def decrypter(raw_cipher_text, password):
     cipher_text = ''
     try:
-        for i in raw_cipher_text:
-            if i =='\n' or i == ' ':
-                pass
-            else:
-                cipher_text += number_to_symbol[i]
+        cipher_text = subsitution_decrypter(raw_cipher_text)
         p_len = len(cipher_text)
         plain_text = ''
 
         if p_len-192<=0:
-            plain_text = reserved_sentances[3]
+            plain_text = reserved_sentances[1]
 
         else:
             block1 = char_decrypter(cipher_text,key_maker(160,password,1),0,160,1)
@@ -129,6 +149,7 @@ def decrypter(raw_cipher_text, password):
 
             password_filler_text = password + password_filler
             ciphert_output_password_hash = hs.sha256(password_filler_text.encode('utf-8')).hexdigest()
+
             if ciphert_output_password_hash == password_hash:
                 block1_hash = hs.sha256(block1.encode('utf-8')).hexdigest()
 
@@ -143,7 +164,7 @@ def decrypter(raw_cipher_text, password):
                     plain_text = reserved_sentances[1]
 
             else:
-                plain_text = reserved_sentances[4]
+                plain_text = reserved_sentances[3]
     except KeyError:
         plain_text = reserved_sentances[1]
 
@@ -157,9 +178,9 @@ FG_TEXT = "#333333"
 ACCENT_PRI = "#00087a"   
 ACCENT_NEG = "#ff0000" 
 
-FONT_BODY = ('Consolas', 20,'bold')
-FONT_TITLE = ('Consolas', 16, 'bold')
-FONT_LABEL = ('Consolas', 16, 'bold')
+FONT_BODY = ('Consolas', 14,'bold')
+FONT_TITLE = ('Consolas', 15, 'bold')
+FONT_LABEL = ('Consolas', 15, 'bold')
 
 root = tk.Tk()
 root.title("FINAL PROJECT")
