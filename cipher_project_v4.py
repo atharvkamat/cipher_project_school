@@ -92,6 +92,7 @@ def subsitution_encrypter(plaintext):
       
         if (current_index+1)%30 ==0:
             cipher_text_list.append('\n')
+        current_index +=1
 
     return ''.join(cipher_text_list)
 
@@ -119,7 +120,7 @@ def encrypter(plain_text, password=False):
     block1_hash = hs.sha256(block1.encode()).hexdigest()
 
     try:
-        cipher_text1 = char_encrypter(block1,password)
+        cipher_text1 = char_encrypter(block1,password,1)
         cipher_text2 = char_encrypter(block2,block1_hash)
         cipher_text_final = subsitution_encrypter(cipher_text1+cipher_text2)
     except KeyError:
