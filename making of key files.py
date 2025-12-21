@@ -1,4 +1,4 @@
-from random import choice
+from secrets import choice
 import string
 
 key_files_path = 'D:\\python projects\\lab activity 3\\cs_project_key_files_final\\New test\\l'
@@ -51,4 +51,5 @@ for i in symbols:
 
 with open(key_files_path+'substitution_cipher_dictionaries.txt','w') as f:
     f.write(str(symbol_to_sub)+'\n')
+
     f.write(str(sub_to_symbol))
