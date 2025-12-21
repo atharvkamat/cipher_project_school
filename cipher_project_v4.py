@@ -17,7 +17,7 @@ ord_to_symbol = dict(zip(range(100),symbols))
 
 cache = dict.fromkeys(symbols,None)
 chunk_size = 8912
-chunk_number_list =['-1']
+chunk_number_list =[-1]
 with open(key_files_path+'a.txt','r') as f:
     key_file_len = len(f.read())
 
@@ -128,9 +128,8 @@ def encrypter(plain_text, password=False):
     if plain_text in reserved_sentances:
         cipher_text_final = reserved_sentances[2]
     end_time = perf_counter()
-    print('Encryption output: pt len:',len(plain_text),'ct_len:',len(cipher_text_final),'time taken:',end_time-start_time,'sec',sep = ' ')
     chunk_number_list = [-1]
-    return cipher_text_final, password
+    return cipher_text_final, password, end_time-start_time, len(plain_text), len(cipher_text_final)
 
 def char_decrypter(cipher_text,key, lower,upper,block_number = 2):
     decrypted_char_list = []
@@ -198,9 +197,8 @@ def decrypter(raw_cipher_text, password):
         plain_text = reserved_sentances[1]
     
     end_time = perf_counter()
-    print('Decryption output: ct len:',len(raw_cipher_text),'pt_len:',len(plain_text),'time taken:',end_time-start_time,'sec',sep = ' ')
     chunk_number_list = [-1]
-    return plain_text
+    return plain_text, end_time-start_time, len(raw_cipher_text),len(plain_text)
 
 #gui
 
@@ -227,12 +225,12 @@ def handle_encrypt():
         messagebox.showwarning("Warning", "Enter text!")
         return None
     try:
-        encrypted, password = encrypter(plain, password_entry.get().strip() or False)
+        encrypted, password,time_taken,input_len,output_len = encrypter(plain, password_entry.get().strip() or False)
         output_text.delete("1.0", tk.END)
         output_text.insert("1.0", encrypted)
         password_entry.delete(0, tk.END) 
         password_entry.insert(0, password)
-        status_label.config(text="ENCRYPTED", fg=ACCENT_PRI)
+        status_label.config(text=f"ENCRYPTED, TIME TAKEN: {time_taken}, INPUT LENGTH: {input_len}, OUTPUT LENGTH: {output_len}", fg=ACCENT_PRI)
     except FileNotFoundError: 
         status_label.config(text="FAILED (Missing D:\\ files)", fg=ACCENT_NEG)
     except Exception as e: 
@@ -246,10 +244,10 @@ def handle_decrypt():
         messagebox.showwarning("Warning", "Text and password required!") 
         return None
     try:
-        decrypted = decrypter(cipher, password)
+        decrypted,time_taken,input_len,output_len = decrypter(cipher, password)
         output_text.delete("1.0", tk.END)
         output_text.insert("1.0", decrypted)
-        status_label.config(text="DECRYPTED", fg=ACCENT_PRI)
+        status_label.config(text=f"DECRYPTED, TIME TAKEN: {time_taken},INPUT LENGTH: {input_len}, OUTPUT LENGTH: {output_len} ", fg=ACCENT_PRI)
     except FileNotFoundError: 
         status_label.config(text="FAILED (Missing D:\\ files)", fg=ACCENT_NEG)
     except Exception as e: 
