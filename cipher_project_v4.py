@@ -1,13 +1,14 @@
-from random import choice
+from secrets import choice
 import string
 import tkinter as tk
 import hashlib as hs
 from tkinter import messagebox, filedialog, scrolledtext
 from time import perf_counter
+
 start_time = perf_counter()
 global key_files_path,key_file_len, reserved_sentances
 global cache, chunk_number_list,chunk_size,pass_list
-global symbols, symbols_len,symbol_to_ord,ord_to_symbol,symbol_to_sub, sub_to_symbol,sub_to_ord,ord_to_sub,all_sub
+global symbols, symbols_len,symbol_to_ord,ord_to_symbol,symbol_to_sub, sub_to_symbol,sub_to_ord,ord_to_sub
 reserved_sentances = ['INPUT CONTAINS INVALID CHARACTERS/S','DATA CORRUPTED','SENTANCE IS RESERVED(CANNOT BE ENCRYPTED)','PASSWORD INCORRECT OR DATA MAY HAVE BEEN CORRUPTED']
 pass_list = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
 key_files_path = 'D:\\python projects\\lab activity 3\\cs_project_key_files_final\\'
@@ -17,7 +18,7 @@ symbol_to_ord = dict(zip(symbols,range(100)))
 ord_to_symbol = dict(zip(range(100),symbols))
 
 cache = dict.fromkeys(symbols,None)
-chunk_size = 8912
+chunk_size = 4096
 chunk_number_list =[-1]
 with open(key_files_path+'a.txt','r') as f:
     key_file_len = len(f.read())
@@ -46,7 +47,7 @@ for i in all_sub:
 end_time = perf_counter()
 print('time taken for startup:',end_time-start_time,'sec',sep = ' ')
 
-def cache_update(n):
+def cache_update(n): #will update cache dictionary if needed
     global cache,chunk_number_list
     check = n%chunk_size
     if check ==0:
@@ -78,7 +79,7 @@ def key_file(file_name, i):
     cache_update(i)
     return cache[file_name][i%chunk_size]
 
-def key_maker(plain_text_length, password,block_number = 2):
+def key_maker(plain_text_length, password,block_number = 2):# -> list
     if block_number == 1:
         t = (plain_text_length//16) + 1
     else:
@@ -86,39 +87,48 @@ def key_maker(plain_text_length, password,block_number = 2):
     key_list = []
     for i in range(t):
         for k in password:
-            key_list.append(key_file(k, i)) 
-    return ''.join(key_list)
+            key_list.append(symbol_to_ord[key_file(k, i)]) 
+    return key_list
 
-def char_encrypter(plain_text,password,block_number = 2):
-    p_len = len(plain_text)
+def char_encrypter(refined_pt,password,block_number = 2):# -> list
+    p_len = len(refined_pt)
     key = key_maker(p_len,password,block_number)
     cipher_text_list = []
-    current_index = 0
     for a in range(p_len):
-        sum_val = symbol_to_ord[plain_text[a]] + symbol_to_ord[key[a]]
-        cipher_text_list.append(ord_to_symbol[sum_val % symbols_len])
-    return ''.join(cipher_text_list)
+        sum_val = symbol_to_ord[refined_pt[a]] + key[a]
+        cipher_text_list.append(sum_val % symbols_len)
+    return cipher_text_list
 
-def subsitution_encrypter(plaintext):
-    cipher_text_list = []
+def subsitution_encrypter(cipher_text_list):# -> str
+    sub_ct_list = []
     current_index = 0
-    for i in plaintext:
-        current_char_tuple = (symbol_to_ord[i],current_index%100)
+    for i in cipher_text_list:
+        current_char_tuple = (i,current_index%100)
         temp = symbol_to_sub[current_char_tuple]
         char = ''
         for k in temp:
             char += ord_to_sub[k]
-        cipher_text_list.append(char)
-      
+        sub_ct_list.append(char)
+
         if (current_index+1)%30 ==0:
-            cipher_text_list.append('\n')
+            sub_ct_list.append('\n')
         current_index +=1
 
-    return ''.join(cipher_text_list)
+    return ''.join(sub_ct_list)
 
 def encrypter(plain_text, password=False):
     global chunk_number_list
     start_time = perf_counter()
+    refined_pt = []
+    for i in plain_text:
+        try:
+            symbol_to_ord[i]
+            refined_pt.append(i)
+        except KeyError:
+            pass
+
+    plain_text = ''.join(refined_pt)
+
     if not password:
         password = password_maker()
 
@@ -139,19 +149,16 @@ def encrypter(plain_text, password=False):
 
     block1_hash = hs.sha256(block1.encode()).hexdigest()
 
-    try:
-        cipher_text1 = char_encrypter(block1,password,1)
-        cipher_text2 = char_encrypter(block2,block1_hash)
-        cipher_text_final = subsitution_encrypter(cipher_text1+cipher_text2)
-    except KeyError:
-        cipher_text_final = reserved_sentances[0]
+    cipher_text1 = char_encrypter(block1,password,1)
+    cipher_text2 = char_encrypter(block2,block1_hash)
+    cipher_text_final = subsitution_encrypter(cipher_text1+cipher_text2)
     if plain_text in reserved_sentances:
         cipher_text_final = reserved_sentances[2]
     end_time = perf_counter()
     chunk_number_list = [-1]
     return cipher_text_final, password, end_time-start_time, len(plain_text), len(cipher_text_final)
 
-def char_decrypter(cipher_text,key, lower,upper,block_number = 2):
+def char_decrypter(cipher_text,key, lower,upper,block_number = 2):# -> str
     decrypted_char_list = []
     d = 0
     if block_number ==1:
@@ -160,27 +167,23 @@ def char_decrypter(cipher_text,key, lower,upper,block_number = 2):
         d = 160
 
     for a in range(lower,upper,1):
-        diff = symbol_to_ord[cipher_text[a]] - symbol_to_ord[key[a-d]]
+        diff = cipher_text[a] - key[a-d]
         decrypted_char_list.append(ord_to_symbol[diff % symbols_len])
     return ''.join(decrypted_char_list)
     
-def subsitution_decrypter(raw_cipher_text):
+def subsitution_decrypter(raw_cipher_text):# -> list
     raw_ct_clean_list = []
     for i in raw_cipher_text:
-        if i in symbols:
+        try:
+            raw_ct_clean_list.append(sub_to_ord[i])
+        except KeyError:
             pass
-        else:
-            raw_ct_clean_list.append(i)
-
     output_text_list = []
-
     for i in range(0,len(raw_ct_clean_list),3):
-        temp = []
-        for k in raw_ct_clean_list[i:i+3]:
-            temp.append(sub_to_ord[k])
-        char = ord_to_symbol[sub_to_symbol[tuple(temp)]]
+        char = sub_to_symbol[tuple(raw_ct_clean_list[i:i+3])]
         output_text_list.append(char)
-    return ''.join(output_text_list)
+
+    return output_text_list
 
 def decrypter(raw_cipher_text, password):
     global chunk_number_list
