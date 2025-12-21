@@ -4,12 +4,13 @@ import tkinter as tk
 import hashlib as hs
 from tkinter import messagebox, filedialog, scrolledtext
 from time import perf_counter
-
-global cache,chunk_number_list ,chunk_size,pass_list,key_files_path,key_file_len, symbols, symbols_len,symbol_to_ord,ord_to_symbol,symbol_to_sub, sub_to_symbol,reserved_sentances
+start_time = perf_counter()
+global key_files_path,key_file_len, reserved_sentances
+global cache, chunk_number_list,chunk_size,pass_list
+global symbols, symbols_len,symbol_to_ord,ord_to_symbol,symbol_to_sub, sub_to_symbol,sub_to_ord,ord_to_sub,all_sub
 reserved_sentances = ['INPUT CONTAINS INVALID CHARACTERS/S','DATA CORRUPTED','SENTANCE IS RESERVED(CANNOT BE ENCRYPTED)','PASSWORD INCORRECT OR DATA MAY HAVE BEEN CORRUPTED']
 pass_list = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
 key_files_path = 'D:\\python projects\\lab activity 3\\cs_project_key_files_final\\'
-
 symbols = list(string.printable)
 symbols_len = len(symbols)
 symbol_to_ord = dict(zip(symbols,range(100)))
@@ -23,9 +24,27 @@ with open(key_files_path+'a.txt','r') as f:
 
 with open(key_files_path+'substitution_cipher_dictionaries.txt','r') as f:
     dictionaries = f.read().split('\n')
+
 symbol_to_sub = eval(dictionaries[0])
 sub_to_symbol = eval(dictionaries[1])
 del dictionaries
+all_sub = []
+for i in sub_to_symbol.keys():
+    for k in i:
+        if k in all_sub:
+            pass
+        else:
+            all_sub.append(k)
+
+sub_to_ord = {}
+ord_to_sub = {}
+for i in all_sub:
+    char = chr(i)
+    sub_to_ord[char] = i
+    ord_to_sub[i]= char
+
+end_time = perf_counter()
+print('time taken for startup:',end_time-start_time,'sec',sep = ' ')
 
 def cache_update(n):
     global cache,chunk_number_list
@@ -74,6 +93,7 @@ def char_encrypter(plain_text,password,block_number = 2):
     p_len = len(plain_text)
     key = key_maker(p_len,password,block_number)
     cipher_text_list = []
+    current_index = 0
     for a in range(p_len):
         sum_val = symbol_to_ord[plain_text[a]] + symbol_to_ord[key[a]]
         cipher_text_list.append(ord_to_symbol[sum_val % symbols_len])
@@ -87,7 +107,7 @@ def subsitution_encrypter(plaintext):
         temp = symbol_to_sub[current_char_tuple]
         char = ''
         for k in temp:
-            char += chr(k)
+            char += ord_to_sub[k]
         cipher_text_list.append(char)
       
         if (current_index+1)%30 ==0:
@@ -157,7 +177,7 @@ def subsitution_decrypter(raw_cipher_text):
     for i in range(0,len(raw_ct_clean_list),3):
         temp = []
         for k in raw_ct_clean_list[i:i+3]:
-            temp.append(ord(k))
+            temp.append(sub_to_ord[k])
         char = ord_to_symbol[sub_to_symbol[tuple(temp)]]
         output_text_list.append(char)
     return ''.join(output_text_list)
